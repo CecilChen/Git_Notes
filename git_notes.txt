@@ -1,0 +1,128 @@
+本地版本控制系统 -> 集中式版本控制系统(SVN) -> 分布式版本控制系统(Git)
+
+安装Git - Windows
+桌面右击打开Git Bash Here,输入命令 git --version 查看安装的版本
+在不同的文件夹下打开Git - 进入指定文件夹右击Git Bash Here
+
+配置Git对应的用户名和邮箱: $ git config --global user.name "your_username"
+                                         $ git config --global user.email your_email@domain.com
+                                         $ git config --list 查看所有配置
+git config命令的--global参数,表示这台机器上所有的Git仓库repo都会使用这个配置,当然也可以对某个repo指定不同的用户名和邮箱地址
+
+Git的三种状态
+1.已提交(committed) 以提交表示数据已经安全的保存在本地数据库中
+2.已修改(modified) 已修改表示修改了文件,但还没有保存到数据库中
+3.已暂存(staged) 已暂存表示对一个已修改文件的当前版本做了标记,使之包含在下次提交的快照中
+
+working directory ->(git add) staging area ->(commit) git directory(repository)
+git directory(repository) -> working directory
+
+工作区:简单的理解为电脑能看到的目录,比如自己创建的本地目录
+暂存区:Git的版本库里存了很多东西,其中最重要的就是成为stage(或者叫做index)的暂存区,
+           还有Git自动创建的第一个分支master,以及指向master的一个指针叫做HEAD
+Git仓库:工作区有一个隐藏目录.git,这个不算工作区,而是Git的版本库
+
+基本的Git工作流程:
+* 在工作区中修改某些文件
+* 对修改后的文件进行快照,然后添加到暂存区
+* 提交更新,将保存在暂存区的文件快照永久转储到Git仓库中
+
+* 初始化git本地仓库
+   $ git init
+* 新建一个文件输入内容
+* 查看工作目录与暂存区文件状态
+   $ git status
+* 将文件添加到暂存区
+   $ git add <path>
+* 查看状态
+   $ git status
+* 提交到git本地数据库
+   $ git commit -m "comment"
+* 显示提交日志信息
+   $ git log
+
+$ git commit -a 表示保存至暂存区并提交到本地repo
+
+$ git diff HEAD -- filename 对比本地库文件和文件夹中的文件
+
+差异比较说明:
+--- a 变动之前的文件
++++b 变动之后的文件
+变动的位置用两个@作为起首和结束
+@@ -1,2 +1,3 @@; 减号表示第一个文件"1"表示第一行,"2"表示连续2行,同理"3"表示连续3行
+
+$ git reset HEAD -- 撤销暂存区文件的提交
+
+
+版本回退
+$ git log -5 --pretty=online 查看5行并且显示成只有版本标识符的单行
+$ git reset --hard HEAD^ 回退到上一个版本
+$ git reset --hard HEAD^^ 回退到上上个版本
+$ git reset --hard HEAD~3 往回3个版本, 数字代表往回退的版本数
+
+回退后想要返回未来的版本
+$ git reset --hard 版本标识符(前几位就可以但必须要unique)
+
+往回回退了3个版本后清空了命令行或者关闭了Bash,无法看到未来版本的标识符
+$ git reflog
+查看版本操作记录
+$ git reset --hard 版本标识符回到想要的版本
+
+
+文件删除
+工作区和git本地repo都有一个a.txt(通过commit提交的),只在工作区中删除了a.txt, git可以检测到
+$ git checkout a.txt 从git repo中还原(拷贝)了a.txt到本地文件夹 (处理误删的情况)
+
+$ git rm a.txt 工作区和git repo都删除了文件,git检测不到
+$ git ls-files 查看git repo中的文件
+
+
+远程仓库 local repo
+
+克隆远程项目到本地
+$ git clone url
+
+
+将本地repo推送到远程repo
+Github上new repository
+通过HTTPS
+$ git init
+$ git add README.md
+$ git commit -m "first commit"
+$ git remote add origin https_url
+$ git push -u origin master
+通过ssh的公钥和密钥: 生成公钥和密钥 $ ssh-keygen -t rsa -C "email_address"
+在GitHub上配置公钥, 测试是否匹配成功 $ ssh -T git@github.com
+$ git init
+$ git add README.md
+$ git commit -m "first commit"
+$ git remote add origin ssh_url
+$ git push -u origin master
+这里的origin表示本地和远程连接的一个别名
+
+
+
+本地分支操作(branch)
+$ git checkout branch 切换到指定的分支
+$ git checkout -b new_branch 新建分支并且切换到新建的分支
+$ git branch -d branch 删除指定分支
+$ git merge branch 合并分支, 必须先切换到master分支再合并其他的分支
+$ git branch 查看本地所有分支并显示当前所在的分支 *表示当前所在的分支
+$ git branch -m old_branch new_branch 重命名分支
+$ git branch -M old_branch new_branch 如果已经存在一样名称的分支,强制重命名分支
+
+$ git branch -a 查看本地与远程分支
+$ git push origin branch_name 推送本地分支到远程
+$ git push origin :remote_branch 删除远程分支(本地分支还保留)
+$ git checkout -b local_branch origin/remote_branch 拉取远程指定分支并在本地创建分支
+$ git fetch 读取远程repo最新的状态
+
+
+标签
+$ git tag tag_name 新建标签默认为HEAD
+$ git tag -a tag_name -m 'xxx' 添加标签并指定标签描述信息
+$ git tag 查看所有标签
+$ git tag -d tag_name 删除一个本地标签
+$ git push origin tag_name 推送本地标签到远程
+$ git push origin --tags 推送全部未推送过的本地标签到远程
+$ git push origin :refs/tags/tag_name 删除一个远程标签
